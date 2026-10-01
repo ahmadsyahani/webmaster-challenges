@@ -9,20 +9,31 @@ test('Postgres enforces one attempt, phase locks, deadline, versions, idempotenc
   try {
     await db.exec('create role anon; create role authenticated; create role service_role bypassrls;');
     await db.exec(await readFile('supabase/migrations/20261001_secure_assessment.sql','utf8'));
+    await db.query("insert into assessment_invites(nrp,nama,kelas,token_hash) values('654321','Old User','A','old-hash')");
+    let legacy = (await db.query<{a:Attempt}>("select assessment_start('654321','old-hash') a")).rows[0].a;
+    await db.exec(await readFile('supabase/migrations/20261003_twenty_mcq.sql','utf8'));
+    legacy = (await db.query<{a:Attempt}>('select to_jsonb(a) a from assessment_attempts a where id=$1',[legacy.id])).rows[0].a;
+    assert.equal(legacy.mcq_total,15);
     await db.query("insert into assessment_invites(nrp,nama,kelas,token_hash) values('123456','Test','A','hash')");
     const start = async () => (await db.query<{a:Attempt}>("select assessment_start('123456','hash') a")).rows[0].a;
     const mutate = async (a: Attempt, action: string, payload = {}) => (await db.query<{a:Attempt}>(
       'select assessment_mutate($1,$2,$3::jsonb,$4) a',[a.id,action,JSON.stringify(payload),a.version])).rows[0].a;
+    await assert.rejects(mutate(legacy,'save_mcq',{ questionId:'16',option:0 }), /tidak valid/);
+    for (let i=1;i<=15;i++) legacy=await mutate(legacy,'save_mcq',{ questionId:String(i),option:0 });
+    legacy=await mutate(legacy,'advance'); assert.equal(legacy.phase,'coding');
     await assert.rejects(db.query("select assessment_start('123456','wrong')"), /NRP atau kode akses/);
     let a = await start(); const again = await start(); assert.equal(a.id,again.id); assert.equal(a.expires_at,again.expires_at);
+    assert.equal(a.mcq_total,20);
     await assert.rejects(mutate(a,'save_code',{ questionId:'1',code:'bad' }), /Selesaikan penalaran/);
     await assert.rejects(mutate(a,'advance'), /Jawab seluruh/);
     const old = a;
     a = await mutate(a,'save_mcq',{ questionId:'1',option:2 });
     await assert.rejects(mutate(old,'save_mcq',{ questionId:'2',option:0 }), /tab lain/);
-    await assert.rejects(mutate(a,'save_mcq',{ questionId:'16',option:0 }), /tidak valid/);
+    await assert.rejects(mutate(a,'save_mcq',{ questionId:'21',option:0 }), /tidak valid/);
     await assert.rejects(mutate(a,'save_mcq',{ questionId:'2',option:99 }), /tidak valid/);
     for (let i=2;i<=15;i++) a=await mutate(a,'save_mcq',{ questionId:String(i),option:0 });
+    await assert.rejects(mutate(a,'advance'), /Jawab seluruh/);
+    for (let i=16;i<=20;i++) a=await mutate(a,'save_mcq',{ questionId:String(i),option:0 });
     a=await mutate(a,'advance'); assert.equal(a.phase,'coding');
     await assert.rejects(mutate(a,'save_mcq',{ questionId:'1',option:0 }), /sudah dikunci/);
     a=await mutate(a,'save_code',{ questionId:'1',code:'function add(a,b){return a+b}',passed:true });

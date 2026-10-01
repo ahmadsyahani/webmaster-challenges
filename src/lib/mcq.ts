@@ -91,5 +91,33 @@ export const mcqQuestions: MCQ[] = [
     id: 15,
     question: "Jika program terjebak dalam perulangan yang tidak pernah berhenti, masalah tersebut disebut?",
     options: ["Syntax Loop", "Deadlock", "Infinite Loop", "Memory Leak"],
+  },
+  {
+    id: 16,
+    question: "Apa output dari kode JavaScript berikut?",
+    codeSnippet: "const angka = [2, 4, 6];\nconst hasil = angka.map(n => n / 2);\nconsole.log(hasil[1]);",
+    options: ["2", "4", "6", "undefined"],
+  },
+  {
+    id: 17,
+    question: "Apa hasil dari perbandingan JavaScript berikut: \"5\" === 5?",
+    options: ["true, karena nilainya sama", "false, karena tipenya berbeda", "5", "Error"],
+  },
+  {
+    id: 18,
+    question: "Perhatikan pseudo-code berikut. Angka mana yang dicetak?",
+    codeSnippet: "FOR i = 1 TO 4\n  IF i == 3 THEN CONTINUE\n  PRINT i\nEND FOR",
+    options: ["1, 2, 3, 4", "1, 2, 4", "3 saja", "1, 2, 3"],
+  },
+  {
+    id: 19,
+    question: "Jika data sudah terurut, berapa kompleksitas waktu pencarian binary search pada n elemen?",
+    options: ["O(1)", "O(log n)", "O(n)", "O(n²)"],
+  },
+  {
+    id: 20,
+    question: "Perhatikan dua perulangan bersarang berikut. Berapa kali PRINT dijalankan?",
+    codeSnippet: "FOR i = 1 TO 3\n  FOR j = 1 TO 2\n    PRINT 'PensMate'\n  END FOR\nEND FOR",
+    options: ["2 kali", "3 kali", "5 kali", "6 kali"],
   }
 ];

@@ -15,6 +15,7 @@ test('production HTTP flow: self registration, save, lock, grade, resume and acc
   await database.exec('create role anon; create role authenticated; create role service_role bypassrls;');
   await database.exec(await readFile('supabase/migrations/20261001_secure_assessment.sql','utf8'));
   await database.exec(await readFile('supabase/migrations/20261002_self_registration.sql','utf8'));
+  await database.exec(await readFile('supabase/migrations/20261003_twenty_mcq.sql','utf8'));
   const bridge = createServer(async (req,res) => {
     res.setHeader('Content-Type','application/json');
     if (req.headers.authorization !== 'Bearer integration-service-key') { res.statusCode=401; res.end('{}'); return; }
@@ -79,14 +80,16 @@ test('production HTTP flow: self registration, save, lock, grade, resume and acc
     assert.equal(start.status,200); const participant=start.headers.get('set-cookie')!.split(';')[0];
     let state=await start.json(); const id=state.attempt.id;
     assert.equal(state.attempt.prodi,'D4 Teknik Informatika');
+    assert.equal(state.attempt.mcq_total,20);
     assert.equal((await request('/api/assessment',{action:'start',nrp:'123456',nama:'Other User',prodi:'D4 Teknik Informatika',kelas:'A'})).status,409);
     assert.equal((await request('/api/admin',undefined,participant)).status,401);
     const csrf=await fetch(origin+'/api/assessment',{method:'POST',headers:{origin:'https://wrong.example','Content-Type':'application/json',cookie:participant},body:'{}'});
     assert.equal(csrf.status,403);
     assert.equal((await request('/api/assessment',{action:'advance',version:state.attempt.version},participant)).status,400);
-    for(let q=1;q<=15;q++) {
+    for(let q=1;q<=20;q++) {
       const res=await request('/api/assessment',{action:'save_mcq',questionId:String(q),option:0,version:state.attempt.version},participant);
       assert.equal(res.status,200); state=await res.json();
+      if (q===15) assert.equal((await request('/api/assessment',{action:'advance',version:state.attempt.version},participant)).status,400);
     }
     state=await (await request('/api/assessment',{action:'advance',version:state.attempt.version},participant)).json();
     assert.equal(state.attempt.phase,'coding');

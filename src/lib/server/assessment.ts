@@ -15,7 +15,7 @@ export async function finalize(attempt: Attempt): Promise<Attempt> {
     progress[question.id] = { code, passed };
   }
   return mutate(attempt.id, 'finalize', {
-    mcq_score: mcqScore(attempt.mcq_answers),
+    mcq_score: mcqScore(attempt.mcq_answers, attempt.mcq_total ?? 15),
     coding_score: Math.round(Object.values(progress).filter(p => p.passed).length / questions.length * 100),
     coding_progress: progress,
   });

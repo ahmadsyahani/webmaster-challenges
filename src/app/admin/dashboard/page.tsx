@@ -299,10 +299,10 @@ export default function AdminDashboard() {
           {detailTab === 'reasoning' ? <>
             <div className="admin-section-title">
               <div><h3>Jawaban penalaran</h3><p>Jawaban peserta dibandingkan langsung dengan kunci.</p></div>
-              <span>{Object.keys(detail.attempt.mcq_answers).length}/15 terjawab</span>
+              <span>{Object.keys(detail.attempt.mcq_answers).length}/{detail.attempt.mcq_total ?? 15} terjawab</span>
             </div>
             <div className="admin-answer-list">
-            {mcqQuestions.map(q => {
+            {mcqQuestions.slice(0, detail.attempt.mcq_total ?? 15).map(q => {
               const answer = detail.attempt.mcq_answers[String(q.id)];
               const correct = detail.answerKey[String(q.id)];
               const isEmpty = answer === undefined;

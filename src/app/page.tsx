@@ -16,7 +16,7 @@ export default function Home() {
         <p className="eyebrow">ASSESSMENT WEBMASTER</p>
         <h1 id="registration-title">Mulai assessment</h1>
         <p className="registration-simple-intro">Isi data diri untuk masuk ke sesi penalaran dan coding JavaScript.</p>
-        <p className="registration-simple-meta"><span>15 soal</span><i/> <span>10 soal</span><i/> <span>60 menit</span></p>
+        <p className="registration-simple-meta"><span>20 soal</span><i/> <span>10 soal</span><i/> <span>60 menit</span></p>
         <form onSubmit={async e => {
           e.preventDefault(); if (busy) return;
           const values = new FormData(e.currentTarget);
@@ -41,7 +41,7 @@ export default function Home() {
         <p className="eyebrow">SEBELUM MULAI</p>
         <h2 id="guide-title">Alur & aturan</h2>
         <ol className="registration-guide-steps">
-          <li><span>01</span><div><strong>Penalaran · 15 soal</strong><p>Pilih satu jawaban. Kamu bisa berpindah soal; sesi terkunci saat lanjut ke coding.</p></div></li>
+          <li><span>01</span><div><strong>Penalaran · 20 soal</strong><p>Pilih satu jawaban. Kamu bisa berpindah soal; sesi terkunci saat lanjut ke coding.</p></div></li>
           <li><span>02</span><div><strong>Coding · 10 soal</strong><p>Tulis JavaScript dan jalankan contoh tes. Penilaian juga memakai tes tambahan.</p></div></li>
           <li><span>03</span><div><strong>Periksa & kumpulkan</strong><p>Pastikan jawaban tersimpan sebelum mengirim. Setelah dikumpulkan, jawaban terkunci.</p></div></li>
         </ol>

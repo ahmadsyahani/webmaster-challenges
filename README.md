@@ -1,10 +1,10 @@
 # PensMate Logic Assessment
 
-Seleksi RnD Webmaster: pendaftaran mandiri, 15 soal penalaran, 10 soal coding JavaScript, dan 60 menit untuk kedua sesi.
+Seleksi RnD Webmaster: pendaftaran mandiri, 20 soal penalaran, 10 soal coding JavaScript, dan 60 menit untuk kedua sesi.
 
 ## Setup sebelum dipakai
 
-1. Jalankan `supabase/migrations/20261001_secure_assessment.sql`, lalu `supabase/migrations/20261002_self_registration.sql` di SQL Editor Supabase **secara berurutan**. Jika migrasi pertama sudah dijalankan sebelumnya, cukup jalankan yang kedua. Data attempt dan submission lama tetap tersimpan. Jalankan di staging dahulu dan saat tidak ada ujian aktif.
+1. Untuk database baru, jalankan `supabase/migrations/20261001_secure_assessment.sql`, `supabase/migrations/20261002_self_registration.sql`, lalu `supabase/migrations/20261003_twenty_mcq.sql` di SQL Editor Supabase **secara berurutan**. Jika dua migrasi pertama sudah terpasang, cukup jalankan yang ketiga. Sesi yang sudah ada tetap 15 soal; pendaftaran baru mendapat 20 soal. Data attempt dan submission lama tetap tersimpan.
 2. Lengkapi `.env.local` mengikuti `.env.example`: `SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY`, `SESSION_SECRET` (minimal 32 karakter), `ADMIN_PASSWORD` (minimal 16 karakter), dan `APP_ORIGIN`. Service-role key serta secret hanya berada di environment server, bukan variabel `NEXT_PUBLIC_`.
 3. Generate `SESSION_SECRET` dengan `node -e "console.log(require('node:crypto').randomBytes(32).toString('hex'))"`. Untuk dev, `APP_ORIGIN=http://localhost:3000`. Pada deployment, gunakan origin HTTPS persis tanpa slash terakhir.
 4. Jalankan `npm install`, `npm test`, `npm run lint`, `npm run typecheck`, `npm run build`, kemudian `npm run test:integration`. Untuk lokal, `npm run dev`.
@@ -16,7 +16,7 @@ Server menolak permintaan jika konfigurasi/schema belum siap. `NEXT_PUBLIC_SUPAB
 
 - Isi nama, NRP/NIM, prodi, dan kelas. Tidak ada kode akses panitia. Sesi 60 menit dimulai ketika pertama kali menekan **Mulai assessment**. NRP yang sama tidak bisa membuat percobaan kedua.
 - Bila browser yang sama masih memiliki cookie sesi, tombol **Lanjutkan pengerjaan** muncul di beranda. Refresh atau membuka ulang browser yang sama tidak mengulang timer.
-- Setiap jawaban penalaran tersimpan saat dipilih. Setelah semua 15 soal dijawab, peserta mengonfirmasi pindah sesi; jawaban penalaran lalu terkunci.
+- Setiap jawaban penalaran tersimpan saat dipilih. Setelah semua 20 soal dijawab, peserta mengonfirmasi pindah sesi; jawaban penalaran lalu terkunci.
 - Kode tersimpan otomatis sekitar satu detik setelah diedit, dan selalu disimpan sebelum pindah soal, menjalankan contoh, atau submit. Tunggu tulisan **Semua perubahan tersimpan** sebelum keluar. Draft lokal hanya cadangan dan tidak menentukan nilai.
 - Run Tests menampilkan contoh yang lulus atau gagal. Skor akhir dihitung ulang di server memakai contoh dan hidden tests untuk seluruh kode yang tersimpan.
 - Submit mengunci jawaban secara atomik dan memberikan nomor bukti. Submit ulang aman.

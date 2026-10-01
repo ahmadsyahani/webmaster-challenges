@@ -32,7 +32,11 @@ test('changing admin password invalidates existing admin sessions only', () => {
   }
 });
 test('MCQ public data has no answer keys; unknown IDs cannot inflate scores', () => {
+  assert.equal(mcqQuestions.length, 20);
+  assert.deepEqual(mcqQuestions.map(q => q.id), Array.from({length:20}, (_,i) => i+1));
+  assert.deepEqual(Object.keys(MCQ_KEY).map(Number).sort((a,b) => a-b), mcqQuestions.map(q => q.id));
   assert.equal(mcqScore(MCQ_KEY), 100);
+  assert.equal(mcqScore(Object.fromEntries(Object.entries(MCQ_KEY).filter(([id]) => Number(id) <= 15)),15), 100);
   assert.equal(mcqScore({ ...MCQ_KEY, '999': 2 }), 100);
   assert.equal(mcqScore({}), 0);
   assert.ok(mcqQuestions.every(q => !('correctAnswer' in q)));
