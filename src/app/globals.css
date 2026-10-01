@@ -9,12 +9,12 @@
 .assessment-shell p { line-height: 1.65; margin: 8px 0; }
 .assessment-shell .eyebrow { font-size: 12px; text-transform: uppercase; letter-spacing: .12em; color: var(--accent); font-weight: 700; }
 .assessment-shell label { display: block; font-size: 14px; font-weight: 600; margin: 12px 0 6px; }
-.assessment-shell input, .assessment-shell textarea { width: 100%; padding: 12px; border: 1px solid var(--border-strong); border-radius: 8px; background: var(--surface); margin: 4px 0 12px; }
-.assessment-shell button, .assessment-shell a { display: inline-block; padding: 10px 15px; border-radius: 8px; border: 1px solid var(--border-strong); background: var(--surface); font-weight: 600; cursor: pointer; }
-.assessment-shell button:hover, .assessment-shell a:hover { background: var(--accent-bg); }
-.assessment-shell button:disabled { opacity: .5; cursor: not-allowed; }
-.assessment-shell :focus-visible { outline: 3px solid var(--accent); outline-offset: 3px; }
-.assessment-shell button.selected { color: white; background: var(--accent); border-color: var(--accent); }
+.assessment-shell :where(input, textarea):not(:where(#code-editor *)) { width: 100%; padding: 12px; border: 1px solid var(--border-strong); border-radius: 8px; background: var(--surface); margin: 4px 0 12px; }
+.assessment-shell :where(button, a):not(:where(#code-editor *)) { display: inline-block; padding: 10px 15px; border-radius: 8px; border: 1px solid var(--border-strong); background: var(--surface); font-weight: 600; cursor: pointer; }
+.assessment-shell :where(button, a):not(:where(#code-editor *)):hover { background: var(--accent-bg); }
+.assessment-shell button:not(:where(#code-editor *)):disabled { opacity: .5; cursor: not-allowed; }
+.assessment-shell :focus-visible:not(:where(#code-editor *)) { outline: 3px solid var(--accent); outline-offset: 3px; }
+.assessment-shell button.selected:not(:where(#code-editor *)) { color: white; background: var(--accent); border-color: var(--accent); }
 .assessment-header, .button-row { display: flex; gap: 12px; align-items: center; justify-content: space-between; flex-wrap: wrap; }
 .button-row { justify-content: flex-start; }
 .question-nav { display: flex; gap: 8px; flex-wrap: wrap; }
@@ -39,6 +39,8 @@
 @media (max-width: 800px) { .workspace-grid, .invite-form { grid-template-columns: 1fr; } .assessment-shell { padding: 16px 10px; } .assessment-card { padding: 18px; } }
 
 :root {
+  --font-plus-jakarta: "Segoe UI", Arial, sans-serif;
+  --font-jetbrains-mono: "Cascadia Code", "Courier New", monospace;
   /* Tetris colors (untuk challenge/game jika ada) */
   --tetris-1: oklch(0.609 0.111 221.7);
   --tetris-2: oklch(0.666 0.157 58.3);

@@ -5,9 +5,14 @@ import { mcqQuestions } from '@/lib/mcq';
 import { questions } from '@/lib/questions';
 import type { Attempt } from '@/lib/assessment-types';
 import { csvCell } from '@/lib/csv';
-import { Code2, Download, RefreshCw, LogOut, ChevronLeft, ChevronRight, Eye, ClipboardCheck, Loader2, Lock } from 'lucide-react';
+import { Code2, Download, RefreshCw, LogOut, ChevronLeft, ChevronRight, Eye, ClipboardCheck, Loader2, Lock, CheckCircle2, XCircle, CircleMinus } from 'lucide-react';
 
 type Listing = { attempts: Attempt[]; count: number; page: number };
+
+function finalScore(attempt: Attempt) {
+  if (!attempt.result) return null;
+  return Math.round((attempt.result.mcq_score + attempt.result.coding_score) / 2);
+}
 
 function Badge({ phase }: { phase: string }) {
   const map: Record<string, { label: string; cls: string }> = {
@@ -25,6 +30,7 @@ export default function AdminDashboard() {
   const [password, setPassword] = useState('');
   const [listing, setListing] = useState<Listing>({ attempts: [], count: 0, page: 0 });
   const [detail, setDetail] = useState<{ attempt: Attempt; answerKey: Record<string, number> } | null>(null);
+  const [detailTab, setDetailTab] = useState<'reasoning' | 'coding'>('reasoning');
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState('');
 
@@ -51,11 +57,12 @@ export default function AdminDashboard() {
 
   function exportCSV() {
     const rows = [
-      ['Nama', 'NRP', 'Prodi', 'Kelas', 'Status', 'MCQ', 'Coding', 'Waktu submit'],
+      ['Nama', 'NRP', 'Prodi', 'Kelas', 'Status', 'Penalaran', 'Coding', 'Nilai akhir', 'Waktu submit'],
       ...listing.attempts.map(a => [
         a.nama, a.nrp, a.prodi, a.kelas, a.phase,
         String(a.result?.mcq_score ?? ''),
         String(a.result?.coding_score ?? ''),
+        String(finalScore(a) ?? ''),
         a.submitted_at || '',
       ]),
     ];
@@ -183,33 +190,38 @@ export default function AdminDashboard() {
                 <th>Status</th>
                 <th>MCQ</th>
                 <th>Coding</th>
+                <th>Nilai akhir</th>
                 <th>Aksi</th>
               </tr>
             </thead>
             <tbody>
               {listing.attempts.length === 0 && (
-                <tr><td colSpan={6} className="admin-empty">Belum ada peserta yang memulai tes.</td></tr>
+                <tr><td colSpan={7} className="admin-empty">Belum ada peserta yang memulai tes.</td></tr>
               )}
               {listing.attempts.map(a => (
                 <tr key={a.id}>
-                  <td><strong>{a.nama}</strong></td>
-                  <td>
+                  <td data-label="Peserta"><strong>{a.nama}</strong></td>
+                  <td data-label="Identitas">
                     {a.nrp}<br />
                     <small>{a.prodi}</small><br />
                     <small>{a.kelas}</small>
                   </td>
-                  <td>
+                  <td data-label="Status">
                     <Badge phase={a.phase} />
                     <br />
                     <small>Batas: {new Date(a.expires_at).toLocaleString('id-ID')}</small>
                   </td>
-                  <td className="admin-score">{a.result?.mcq_score ?? '\u2014'}</td>
-                  <td className="admin-score">{a.result?.coding_score ?? '\u2014'}</td>
-                  <td>
+                  <td data-label="Penalaran" className="admin-score">{a.result?.mcq_score ?? '\u2014'}</td>
+                  <td data-label="Coding" className="admin-score">{a.result?.coding_score ?? '\u2014'}</td>
+                  <td data-label="Nilai akhir" className="admin-score admin-final-score">{finalScore(a) ?? '\u2014'}</td>
+                  <td data-label="Aksi">
                     <div className="button-row">
                       <button
                         disabled={busy}
-                        onClick={() => void act(async () => setDetail(await api(`/api/admin?id=${a.id}`)))}
+                        onClick={() => void act(async () => {
+                          setDetail(await api(`/api/admin?id=${a.id}`));
+                          setDetailTab('reasoning');
+                        })}
                         title="Lihat detail"
                       >
                         <Eye size={14} />
@@ -254,35 +266,89 @@ export default function AdminDashboard() {
 
       {/* Detail panel */}
       {detail && (
-        <section className="assessment-card admin-detail-card">
-          <div className="admin-table-header">
-            <h2>Jawaban {detail.attempt.nama}</h2>
+        <div className="admin-detail-backdrop" role="presentation" onMouseDown={event => {
+          if (event.target === event.currentTarget) setDetail(null);
+        }}>
+        <section className="admin-detail-card" role="dialog" aria-modal="true" aria-labelledby="participant-detail-title">
+          <div className="admin-detail-header">
+            <div>
+              <p className="eyebrow">DETAIL HASIL PESERTA</p>
+              <h2 id="participant-detail-title">{detail.attempt.nama}</h2>
+              <p>{detail.attempt.nrp} · {detail.attempt.prodi} · {detail.attempt.kelas}</p>
+            </div>
             <button onClick={() => setDetail(null)}>Tutup</button>
           </div>
-          <h3>Penalaran</h3>
-          {mcqQuestions.map(q => (
-            <details key={q.id}>
-              <summary>{q.id}. {q.question}</summary>
-              {q.codeSnippet && <pre className="code-block">{q.codeSnippet}</pre>}
-              <p>Jawaban: {q.options[detail.attempt.mcq_answers[String(q.id)]] ?? 'Kosong'}</p>
-              <p>Kunci: {q.options[detail.answerKey[String(q.id)]]}</p>
-            </details>
-          ))}
-          <h3>Coding</h3>
-          {questions.map(q => (
-            <details key={q.id}>
-              <summary>
-                {q.id}. {q.title} ·{' '}
-                {detail.attempt.result?.coding_progress[q.id]?.passed
-                  ? 'Lulus'
-                  : detail.attempt.result
-                    ? 'Belum lulus'
-                    : 'Belum dinilai'}
-              </summary>
-              <pre className="code-block">{detail.attempt.codes[q.id] || '// Kosong'}</pre>
-            </details>
-          ))}
+
+          <div className="admin-result-summary">
+            <div><span>Penalaran</span><strong>{detail.attempt.result?.mcq_score ?? '—'}<small>/100</small></strong></div>
+            <div><span>Coding</span><strong>{detail.attempt.result?.coding_score ?? '—'}<small>/100</small></strong></div>
+            <div className="admin-result-total"><span>Nilai akhir</span><strong>{finalScore(detail.attempt) ?? '—'}<small>/100</small></strong></div>
+          </div>
+          <p className="admin-score-note">Nilai akhir = 50% penalaran + 50% coding.</p>
+
+          <div className="admin-detail-tabs" role="tablist" aria-label="Jenis jawaban">
+            <button role="tab" aria-selected={detailTab === 'reasoning'} className={detailTab === 'reasoning' ? 'active' : ''} onClick={() => setDetailTab('reasoning')}>
+              Penalaran <span>{detail.attempt.result?.mcq_score ?? '—'}</span>
+            </button>
+            <button role="tab" aria-selected={detailTab === 'coding'} className={detailTab === 'coding' ? 'active' : ''} onClick={() => setDetailTab('coding')}>
+              Coding <span>{detail.attempt.result?.coding_score ?? '—'}</span>
+            </button>
+          </div>
+
+          <div className="admin-detail-body">
+          {detailTab === 'reasoning' ? <>
+            <div className="admin-section-title">
+              <div><h3>Jawaban penalaran</h3><p>Jawaban peserta dibandingkan langsung dengan kunci.</p></div>
+              <span>{Object.keys(detail.attempt.mcq_answers).length}/15 terjawab</span>
+            </div>
+            <div className="admin-answer-list">
+            {mcqQuestions.map(q => {
+              const answer = detail.attempt.mcq_answers[String(q.id)];
+              const correct = detail.answerKey[String(q.id)];
+              const isEmpty = answer === undefined;
+              const isCorrect = answer === correct;
+              return (
+                <article className={`admin-answer-item ${isEmpty ? 'is-empty' : isCorrect ? 'is-correct' : 'is-wrong'}`} key={q.id}>
+                  <span className="admin-answer-number">{String(q.id).padStart(2, '0')}</span>
+                  <div className="admin-answer-content">
+                    <h4>{q.question}</h4>
+                    {q.codeSnippet && <pre className="code-block">{q.codeSnippet}</pre>}
+                    <div className="admin-answer-comparison">
+                      <p><span>Jawaban peserta</span><strong>{isEmpty ? 'Tidak dijawab' : `${String.fromCharCode(65 + answer)}. ${q.options[answer]}`}</strong></p>
+                      {!isCorrect && <p><span>Jawaban benar</span><strong>{String.fromCharCode(65 + correct)}. {q.options[correct]}</strong></p>}
+                    </div>
+                  </div>
+                  <span className="admin-answer-status">
+                    {isEmpty ? <><CircleMinus size={17}/> Kosong</> : isCorrect ? <><CheckCircle2 size={17}/> Benar</> : <><XCircle size={17}/> Salah</>}
+                  </span>
+                </article>
+              );
+            })}
+            </div>
+          </> : <>
+            <div className="admin-section-title">
+              <div><h3>Jawaban coding</h3><p>Buka soal untuk membaca kode yang dikumpulkan.</p></div>
+              <span>{detail.attempt.result ? `${Object.values(detail.attempt.result.coding_progress).filter(item => item.passed).length}/10 lulus` : 'Belum dinilai'}</span>
+            </div>
+            <div className="admin-code-list">
+            {questions.map(q => {
+              const passed = detail.attempt.result?.coding_progress[q.id]?.passed;
+              const answered = Boolean(detail.attempt.codes[q.id]?.trim());
+              return (
+                <details key={q.id} className={passed ? 'is-correct' : 'is-wrong'}>
+                  <summary>
+                    <span className="admin-code-title"><Code2 size={16}/><strong>{String(q.id).padStart(2, '0')}. {q.title}</strong></span>
+                    <span className="admin-answer-status">{!answered ? <><CircleMinus size={16}/> Kosong</> : passed ? <><CheckCircle2 size={16}/> Lulus</> : detail.attempt.result ? <><XCircle size={16}/> Belum lulus</> : 'Belum dinilai'}</span>
+                  </summary>
+                  <pre className="code-block">{detail.attempt.codes[q.id] || '// Tidak ada jawaban'}</pre>
+                </details>
+              );
+            })}
+            </div>
+          </>}
+          </div>
         </section>
+        </div>
       )}
     </main>
   );
