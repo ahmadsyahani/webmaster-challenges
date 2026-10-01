@@ -241,8 +241,11 @@ export function TetrisLoader({
     }, [onComplete]);
     
     useEffect(() => {
-        setGame(generateTetrisFrames(width, height));
-        frame.current = 0;
+        const handle = requestAnimationFrame(() => {
+            setGame(generateTetrisFrames(width, height));
+            frame.current = 0;
+        });
+        return () => cancelAnimationFrame(handle);
     }, [width, height, round]);
 
     const paint = useCallback(

@@ -1,0 +1,49 @@
+import { test } from 'node:test';
+import assert from 'node:assert/strict';
+import { readFile } from 'node:fs/promises';
+import { PGlite } from '@electric-sql/pglite';
+import type { Attempt } from '../src/lib/assessment-types';
+
+test('Postgres enforces one attempt, phase locks, deadline, versions, idempotency and permissions', async () => {
+  const db = new PGlite();
+  try {
+    await db.exec('create role anon; create role authenticated; create role service_role bypassrls;');
+    await db.exec(await readFile('supabase/migrations/20261001_secure_assessment.sql','utf8'));
+    await db.query("insert into assessment_invites(nrp,nama,kelas,token_hash) values('123456','Test','A','hash')");
+    const start = async () => (await db.query<{a:Attempt}>("select assessment_start('123456','hash') a")).rows[0].a;
+    const mutate = async (a: Attempt, action: string, payload = {}) => (await db.query<{a:Attempt}>(
+      'select assessment_mutate($1,$2,$3::jsonb,$4) a',[a.id,action,JSON.stringify(payload),a.version])).rows[0].a;
+    await assert.rejects(db.query("select assessment_start('123456','wrong')"), /NRP atau kode akses/);
+    let a = await start(); const again = await start(); assert.equal(a.id,again.id); assert.equal(a.expires_at,again.expires_at);
+    await assert.rejects(mutate(a,'save_code',{ questionId:'1',code:'bad' }), /Selesaikan penalaran/);
+    await assert.rejects(mutate(a,'advance'), /Jawab seluruh/);
+    const old = a;
+    a = await mutate(a,'save_mcq',{ questionId:'1',option:2 });
+    await assert.rejects(mutate(old,'save_mcq',{ questionId:'2',option:0 }), /tab lain/);
+    await assert.rejects(mutate(a,'save_mcq',{ questionId:'16',option:0 }), /tidak valid/);
+    await assert.rejects(mutate(a,'save_mcq',{ questionId:'2',option:99 }), /tidak valid/);
+    for (let i=2;i<=15;i++) a=await mutate(a,'save_mcq',{ questionId:String(i),option:0 });
+    a=await mutate(a,'advance'); assert.equal(a.phase,'coding');
+    await assert.rejects(mutate(a,'save_mcq',{ questionId:'1',option:0 }), /sudah dikunci/);
+    a=await mutate(a,'save_code',{ questionId:'1',code:'function add(a,b){return a+b}',passed:true });
+    assert.equal(a.result,null); assert.equal(typeof a.codes['1'],'string');
+    await assert.rejects(mutate(a,'save_code',{ questionId:'999',code:'' }), /tidak valid/);
+    await db.query("update assessment_attempts set expires_at=clock_timestamp()-interval '1 second' where id=$1",[a.id]);
+    a=await mutate(a,'save_code',{ questionId:'1',code:'late' });
+    assert.equal(a.phase,'grading'); assert.notEqual(a.codes['1'],'late');
+    const frozen = JSON.stringify(a.codes);
+    a=await mutate(a,'freeze'); assert.equal(JSON.stringify(a.codes),frozen);
+    a=await mutate(a,'finalize',{ mcq_score:20,coding_score:10,coding_progress:{} }); assert.equal(a.phase,'submitted');
+    const result = JSON.stringify(a.result);
+    a=await mutate(a,'finalize',{ mcq_score:100 }); assert.equal(JSON.stringify(a.result),result);
+    a=await mutate(a,'save_code',{ questionId:'1',code:'after submit' }); assert.equal(JSON.stringify(a.codes),frozen);
+    assert.equal((await start()).id,a.id);
+    await db.query("select assessment_rate_limit('test',1,60)");
+    await assert.rejects(db.query("select assessment_rate_limit('test',1,60)"), /Terlalu banyak/);
+    await db.exec('set role anon;');
+    await assert.rejects(db.query('select * from assessment_attempts'), /permission denied/);
+    await assert.rejects(db.query("select assessment_start('123456','hash')"), /permission denied/);
+    await assert.rejects(db.query("select assessment_mutate($1,'finalize','{}',0)",[a.id]), /permission denied/);
+    await db.exec('reset role;');
+  } finally { await db.close(); }
+});

@@ -1,6 +1,45 @@
 @import "tailwindcss";
 
+.assessment-shell { max-width: 760px; margin: 0 auto; padding: 32px 20px; width: 100%; }
+.assessment-shell.wide { max-width: 1280px; }
+.assessment-card { background: var(--surface); border: 1px solid var(--border); border-radius: 14px; padding: 24px; margin-bottom: 18px; }
+.assessment-shell h1 { font-size: 28px; font-weight: 800; line-height: 1.3; margin-bottom: 10px; }
+.assessment-shell h2 { font-size: 20px; font-weight: 700; margin: 8px 0 16px; }
+.assessment-shell h3 { font-weight: 700; margin: 18px 0 10px; }
+.assessment-shell p { line-height: 1.65; margin: 8px 0; }
+.assessment-shell .eyebrow { font-size: 12px; text-transform: uppercase; letter-spacing: .12em; color: var(--accent); font-weight: 700; }
+.assessment-shell label { display: block; font-size: 14px; font-weight: 600; margin: 12px 0 6px; }
+.assessment-shell input, .assessment-shell textarea { width: 100%; padding: 12px; border: 1px solid var(--border-strong); border-radius: 8px; background: var(--surface); margin: 4px 0 12px; }
+.assessment-shell button, .assessment-shell a { display: inline-block; padding: 10px 15px; border-radius: 8px; border: 1px solid var(--border-strong); background: var(--surface); font-weight: 600; cursor: pointer; }
+.assessment-shell button:hover, .assessment-shell a:hover { background: var(--accent-bg); }
+.assessment-shell button:disabled { opacity: .5; cursor: not-allowed; }
+.assessment-shell :focus-visible { outline: 3px solid var(--accent); outline-offset: 3px; }
+.assessment-shell button.selected { color: white; background: var(--accent); border-color: var(--accent); }
+.assessment-header, .button-row { display: flex; gap: 12px; align-items: center; justify-content: space-between; flex-wrap: wrap; }
+.button-row { justify-content: flex-start; }
+.question-nav { display: flex; gap: 8px; flex-wrap: wrap; }
+.answer-options { display: grid; gap: 12px; }
+.answer-options button { text-align: left; }
+.workspace-grid { display: grid; grid-template-columns: 1fr 1.2fr; gap: 18px; }
+.workspace-grid > * { min-width: 0; }
+.preserve-lines { white-space: pre-wrap; }
+.code-block { white-space: pre-wrap; overflow-wrap: anywhere; background: var(--bg); padding: 14px; border-radius: 8px; margin: 12px 0; font: 13px/1.6 monospace; }
+.notice { background: var(--warning-bg); border: 1px solid var(--warning-border); border-radius: 10px; padding: 16px; margin: 16px 0; }
+.assessment-shell .error { color: var(--error); }
+.rules { padding-left: 24px; list-style: decimal; margin: 20px 0; }
+.rules li { margin: 10px 0; line-height: 1.6; }
+.modal-backdrop { position: fixed; inset: 0; background: #0008; display: grid; place-items: center; padding: 20px; z-index: 100; }
+.modal-backdrop > section { max-width: 550px; }
+.table-scroll { overflow-x: auto; margin: 20px 0; }
+.assessment-shell table { width: 100%; border-collapse: collapse; text-align: left; }
+.assessment-shell th, .assessment-shell td { padding: 12px; border-bottom: 1px solid var(--border); vertical-align: top; }
+.assessment-shell details { margin: 12px 0; }
+.assessment-shell summary { cursor: pointer; padding: 8px 0; }
+.invite-form { display: grid; gap: 14px; grid-template-columns: repeat(3, 1fr); align-items: end; }
+@media (max-width: 800px) { .workspace-grid, .invite-form { grid-template-columns: 1fr; } .assessment-shell { padding: 16px 10px; } .assessment-card { padding: 18px; } }
+
 :root {
+  /* Tetris colors (untuk challenge/game jika ada) */
   --tetris-1: oklch(0.609 0.111 221.7);
   --tetris-2: oklch(0.666 0.157 58.3);
   --tetris-3: oklch(0.541 0.247 293);
@@ -8,13 +47,39 @@
   --tetris-5: oklch(0.577 0.215 27.3);
   --tetris-6: oklch(0.546 0.215 262.9);
   --tetris-7: oklch(0.646 0.194 41.1);
+
+  /* Design system tokens */
+  --bg: #F7F6F4;
+  --surface: #FFFFFF;
+  --border: #E5E2DC;
+  --border-strong: #C9C4BB;
+  --text-primary: #1A1917;
+  --text-secondary: #6B6760;
+  --text-muted: #9C9792;
+
+  /* Accent: hijau tua PENS */
+  --accent: #1D6F42;
+  --accent-hover: #175A35;
+  --accent-bg: #F0F7F3;
+  --accent-border: #B8D9C6;
+
+  /* Status */
+  --success: #1D6F42;
+  --success-bg: #F0F7F3;
+  --success-border: #B8D9C6;
+  --error: #B91C1C;
+  --error-bg: #FEF2F2;
+  --error-border: #FECACA;
+  --warning: #92400E;
+  --warning-bg: #FFFBEB;
+  --warning-border: #FDE68A;
 }
 
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --color-background: var(--bg);
+  --color-foreground: var(--text-primary);
+  --font-sans: var(--font-plus-jakarta), system-ui, sans-serif;
+  --font-mono: var(--font-jetbrains-mono), "Courier New", monospace;
 }
 
 @media (prefers-color-scheme: dark) {
@@ -29,8 +94,16 @@
   }
 }
 
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
 }
+
+body {
+  background: var(--bg);
+  color: var(--text-primary);
+  font-family: var(--font-plus-jakarta), system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+

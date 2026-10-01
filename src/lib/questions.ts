@@ -1,4 +1,4 @@
-// src/lib/questions.ts
+﻿// src/lib/questions.ts
 
 export interface TestCase {
   id: number;
@@ -11,7 +11,6 @@ export interface Question {
   title: string;
   difficulty: 'Mudah' | 'Sedang';
   description: string;
-  hint: string; // <-- Properti Hint Baru
   initialCode: string;
   testCases: TestCase[];
 }
@@ -21,8 +20,7 @@ export const questions: Question[] = [
     id: '1',
     title: 'Penjumlahan Dua Angka',
     difficulty: 'Mudah',
-    description: 'Buatlah fungsi `add(a, b)` yang menerima dua argumen berupa angka dan mengembalikan hasil penjumlahannya.',
-    hint: 'Gunakan operator aritmatika tambah (+) untuk menjumlahkan nilai `a` dan `b`, lalu gunakan keyword `return`.',
+    description: 'Buatlah fungsi `add(a, b)` yang menerima dua parameter berupa angka dan mengembalikan hasil penjumlahan keduanya.\n\nFungsi ini harus bisa menangani angka positif, negatif, dan nol. Pastikan kamu menggunakan kata kunci `return` untuk mengembalikan nilai.',
     initialCode: `function add(a, b) {\n  // Tulis kode kamu di sini\n  \n}`,
     testCases: [
       { id: 1, input: 'add(2, 3)', expectedOutput: '5' },
@@ -32,10 +30,9 @@ export const questions: Question[] = [
   },
   {
     id: '2',
-    title: 'Cek Angka Genap',
+    title: 'Cek Angka Genap atau Ganjil',
     difficulty: 'Mudah',
-    description: 'Buatlah fungsi `isEven(n)` yang mengembalikan nilai boolean `true` jika angka genap, dan `false` jika ganjil.',
-    hint: 'Angka genap adalah angka yang jika dibagi 2 sisa baginya adalah 0. Gunakan operator modulo (`n % 2 === 0`).',
+    description: 'Buatlah fungsi `isEven(n)` yang menerima sebuah angka bilangan bulat dan mengembalikan nilai boolean:\n- `true` jika angka tersebut adalah angka **genap**\n- `false` jika angka tersebut adalah angka **ganjil**\n\nIngat bahwa angka 0 termasuk angka genap.',
     initialCode: `function isEven(n) {\n  // Tulis kode kamu di sini\n  \n}`,
     testCases: [
       { id: 1, input: 'isEven(4)', expectedOutput: 'true' },
@@ -47,8 +44,7 @@ export const questions: Question[] = [
     id: '3',
     title: 'Pembalik String (Reverse String)',
     difficulty: 'Mudah',
-    description: 'Buatlah fungsi `reverseString(str)` yang menerima sebuah string dan mengembalikan string yang dibalik.',
-    hint: 'Kamu bisa memecah string jadi array (`str.split("")`), membalik array (`.reverse()`), lalu menggabungkannya kembali (`.join("")`).',
+    description: 'Buatlah fungsi `reverseString(str)` yang menerima sebuah string dan mengembalikan string tersebut dalam urutan karakter yang terbalik.\n\nContoh: `"hello"` menjadi `"olleh"`, `"PensMate"` menjadi `"etaMsneP"`.\n\nFungsi ini harus bekerja pada string dengan panjang berapapun, termasuk string yang hanya berisi satu karakter.',
     initialCode: `function reverseString(str) {\n  // Tulis kode kamu di sini\n  \n}`,
     testCases: [
       { id: 1, input: 'reverseString("hello")', expectedOutput: '"olleh"' },
@@ -58,10 +54,9 @@ export const questions: Question[] = [
   },
   {
     id: '4',
-    title: 'Cari Angka Terbesar',
+    title: 'Cari Nilai Terbesar dalam Array',
     difficulty: 'Mudah',
-    description: 'Buatlah fungsi `findMax(arr)` yang menerima sebuah array berisi angka dan mengembalikan angka dengan nilai terbesar.',
-    hint: 'Gunakan fungsi `Math.max(...arr)` dengan spread operator, atau gunakan perulangan `for` untuk membandingkan nilai.',
+    description: 'Buatlah fungsi `findMax(arr)` yang menerima sebuah array berisi angka-angka dan mengembalikan **angka dengan nilai terbesar** di antara semua elemen dalam array tersebut.\n\nKamu tidak boleh mengubah isi array aslinya. Anggap array selalu berisi minimal satu elemen dan semua elemennya adalah angka valid.',
     initialCode: `function findMax(arr) {\n  // Tulis kode kamu di sini\n  \n}`,
     testCases: [
       { id: 1, input: 'findMax([1, 5, 3, 9, 2])', expectedOutput: '9' },
@@ -71,10 +66,9 @@ export const questions: Question[] = [
   },
   {
     id: '5',
-    title: 'Hitung Huruf Vokal',
+    title: 'Hitung Jumlah Huruf Vokal',
     difficulty: 'Sedang',
-    description: 'Buatlah fungsi `countVowels(str)` yang menghitung jumlah huruf vokal (a, e, i, o, u) dalam sebuah string (abaikan kapitalisasi/case-insensitive).',
-    hint: 'Ubah string ke huruf kecil terlebih dahulu dengan `.toLowerCase()`, lalu gunakan Regex `str.match(/[aeiou]/g)` atau loop mengecek tiap karakter.',
+    description: 'Buatlah fungsi `countVowels(str)` yang menghitung dan mengembalikan **jumlah huruf vokal** (a, e, i, o, u) yang ada dalam sebuah string.\n\nFungsi ini harus bersifat **case-insensitive** (tidak membedakan huruf besar/kecil), sehingga huruf `"A"` dan `"a"` sama-sama dihitung sebagai vokal. Karakter non-huruf (angka, spasi, dll) diabaikan.',
     initialCode: `function countVowels(str) {\n  // Tulis kode kamu di sini\n  \n}`,
     testCases: [
       { id: 1, input: 'countVowels("Javascript")', expectedOutput: '3' },
@@ -84,10 +78,9 @@ export const questions: Question[] = [
   },
   {
     id: '6',
-    title: 'Cek Palindrom',
+    title: 'Cek Kata Palindrom',
     difficulty: 'Sedang',
-    description: 'Buatlah fungsi `isPalindrome(str)` yang mengecek apakah suatu kata bernilai sama jika dibaca dari depan maupun belakang (Case-insensitive & abaikan spasi).',
-    hint: 'Bersihkan string dari spasi dan ubah ke huruf kecil (`str.toLowerCase().replace(/\\s+/g, "")`), lalu bandingkan dengan versi string terbalik.',
+    description: 'Buatlah fungsi `isPalindrome(str)` yang mengecek apakah sebuah string merupakan **palindrom** — yaitu teks yang dibaca sama dari depan maupun dari belakang.\n\nAturan:\n- **Case-insensitive**: `"Katak"` dan `"katak"` dianggap palindrom\n- **Abaikan spasi**: `"Kasur rusak"` dianggap palindrom\n- Kembalikan `true` jika palindrom, `false` jika tidak',
     initialCode: `function isPalindrome(str) {\n  // Tulis kode kamu di sini\n  \n}`,
     testCases: [
       { id: 1, input: 'isPalindrome("katak")', expectedOutput: 'true' },
@@ -99,8 +92,7 @@ export const questions: Question[] = [
     id: '7',
     title: 'FizzBuzz Classic',
     difficulty: 'Sedang',
-    description: 'Buatlah fungsi `fizzBuzz(n)`. Jika `n` habis dibagi 3 & 5 kembalikan `"FizzBuzz"`, jika habis dibagi 3 kembalikan `"Fizz"`, jika habis dibagi 5 kembalikan `"Buzz"`, selain itu kembalikan angka `n` itu sendiri (dalam tipe angka/number).',
-    hint: 'Pastikan pengecekan kondisi habis dibagi 3 DAN 5 (`n % 15 === 0`) ditaruh di urutan paling atas pengkondisian `if`.',
+    description: 'Buatlah fungsi `fizzBuzz(n)` dengan aturan berikut:\n- Jika `n` habis dibagi **3 dan 5**, kembalikan string `"FizzBuzz"`\n- Jika `n` habis dibagi **3 saja**, kembalikan string `"Fizz"`\n- Jika `n` habis dibagi **5 saja**, kembalikan string `"Buzz"`\n- Selain itu, kembalikan angka `n` itu sendiri (bertipe **number**, bukan string)\n\nUrutan pengecekan kondisi sangat penting!',
     initialCode: `function fizzBuzz(n) {\n  // Tulis kode kamu di sini\n  \n}`,
     testCases: [
       { id: 1, input: 'fizzBuzz(15)', expectedOutput: '"FizzBuzz"' },
@@ -111,10 +103,9 @@ export const questions: Question[] = [
   },
   {
     id: '8',
-    title: 'Filter Angka Genap',
+    title: 'Filter Angka Genap dari Array',
     difficulty: 'Mudah',
-    description: 'Buatlah fungsi `filterEven(arr)` yang menerima sebuah array angka dan mengembalikan array baru yang hanya berisi angka-angka genap saja.',
-    hint: 'Gunakan method array bawaan JavaScript `arr.filter(num => num % 2 === 0)`.',
+    description: 'Buatlah fungsi `filterEven(arr)` yang menerima sebuah array berisi angka-angka dan mengembalikan **array baru** yang hanya berisi **angka-angka genap** saja.\n\nArray asli tidak boleh diubah. Jika tidak ada angka genap sama sekali, kembalikan array kosong `[]`.',
     initialCode: `function filterEven(arr) {\n  // Tulis kode kamu di sini\n  \n}`,
     testCases: [
       { id: 1, input: 'filterEven([1, 2, 3, 4, 5, 6])', expectedOutput: '[2,4,6]' },
@@ -126,8 +117,7 @@ export const questions: Question[] = [
     id: '9',
     title: 'Hitung Faktorial',
     difficulty: 'Sedang',
-    description: 'Buatlah fungsi `factorial(n)` yang mengembalikan nilai faktorial dari angka `n` (contoh: 5! = 5*4*3*2*1 = 120). Jika `n = 0`, kembalikan `1`.',
-    hint: 'Gunakan perulangan `for` mundur dari `n` ke `1` sambil mengalikan variabel penampung, atau gunakan teknik rekursif `n * factorial(n - 1)`.',
+    description: 'Buatlah fungsi `factorial(n)` yang menghitung dan mengembalikan nilai **faktorial** dari bilangan bulat non-negatif `n`.\n\nDefinisi faktorial:\n- `0! = 1` (base case)\n- `n! = n × (n-1) × ... × 2 × 1`\n\nContoh: `5! = 5 × 4 × 3 × 2 × 1 = 120`\n\nKamu bisa menggunakan pendekatan iteratif (loop) maupun rekursif.',
     initialCode: `function factorial(n) {\n  // Tulis kode kamu di sini\n  \n}`,
     testCases: [
       { id: 1, input: 'factorial(5)', expectedOutput: '120' },
@@ -139,8 +129,7 @@ export const questions: Question[] = [
     id: '10',
     title: 'Karakter Paling Sering Muncul',
     difficulty: 'Sedang',
-    description: 'Buatlah fungsi `mostFrequentChar(str)` yang mengembalikan karakter (huruf/angka) yang paling sering muncul dalam sebuah string.',
-    hint: 'Gunakan objek/hashmap untuk menyimpan frekuensi tiap karakter, lalu cari karakter dengan nilai frekuensi tertinggi.',
+    description: 'Buatlah fungsi `mostFrequentChar(str)` yang menerima sebuah string dan mengembalikan **karakter yang paling sering muncul** di dalamnya.\n\nAturan:\n- Hitung frekuensi kemunculan setiap karakter\n- Kembalikan karakter dengan frekuensi tertinggi\n- Jika ada dua karakter dengan frekuensi sama, kembalikan yang **pertama muncul** dalam string\n- String dijamin tidak kosong',
     initialCode: `function mostFrequentChar(str) {\n  // Tulis kode kamu di sini\n  \n}`,
     testCases: [
       { id: 1, input: 'mostFrequentChar("pensmate")', expectedOutput: '"e"' },
